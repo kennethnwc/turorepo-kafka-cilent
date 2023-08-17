@@ -1,0 +1,31 @@
+{
+  "name": "kafka-client",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "module": ".dist/index.mjs",
+  "files": [
+    "dist/**"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "tsup --watch",
+    "build": "tsup"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "kafkajs": "^2.2.4",
+    "zod": "^3.22.1"
+  },
+  "devDependencies": {
+    "tsconfig": "*",
+    "tsup": "^7.2.0",
+    "typescript": "^5.1.6"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

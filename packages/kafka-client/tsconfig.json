@@ -1,0 +1,14 @@
+{
+  "extends": "tsconfig/base.json",
+  "compilerOptions": {
+    "lib": ["ES2021"],
+    "module": "commonjs",
+    "target": "ES2021",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "exclude": ["node_modules/**/*", "**/dist/**/*"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "tsup.config.ts"]
+}
