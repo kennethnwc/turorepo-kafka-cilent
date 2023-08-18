@@ -1,14 +1,20 @@
 import { Consumer, Kafka, KafkaMessage, Partitioners, Producer } from "kafkajs";
 import { z } from "zod";
-
+type TopicMessage = {
+  "user-request": UserRequestMessage;
+  "payment-request": PaymentRequestMessage;
+};
 interface IKafkaClient {
   checkStatus(): Promise<{ topics: string[] }>;
-  startConsumer<T extends Array<(typeof TOPICS)[number]>>(
+  startConsumer<T extends Array<Topic>>(
     topics: T,
     handleKafkaMessage: (message: KafkaMessage, topic: T[number]) => void
   ): Promise<void>;
   stopConsumer(): Promise<void>;
-  sendMessage<T extends Topic>(topic: T, message: Message<T>): Promise<void>;
+  sendMessage<T extends Topic>(
+    topic: T,
+    message: TopicMessage[T]
+  ): Promise<void>;
   getClientId: () => ClientId | undefined;
 }
 
@@ -18,8 +24,7 @@ const groupID = {
 } as const;
 
 type ClientId = keyof typeof groupID;
-type Topic = (typeof TOPICS)[number];
-
+type Topic = keyof TopicMessage;
 export class KafkaClient implements IKafkaClient {
   private kafkaClient: Kafka;
   private producer: Producer;
@@ -45,7 +50,7 @@ export class KafkaClient implements IKafkaClient {
     this.clientId = clientId;
   }
 
-  async startConsumer<T extends Array<(typeof TOPICS)[number]>>(
+  async startConsumer<T extends Array<Topic>>(
     topics: T,
     handleKafkaMessage: (message: KafkaMessage, topic: T[number]) => void
   ): Promise<void> {
@@ -73,11 +78,7 @@ export class KafkaClient implements IKafkaClient {
 
   async sendMessage<T extends Topic>(
     topic: T,
-    message: T extends "user-request"
-      ? UserRequestMessage
-      : T extends "payment-request"
-      ? PaymentRequestMessage
-      : never
+    message: TopicMessage[T]
   ): Promise<void> {
     await this.producer.connect();
     await this.producer.send({
@@ -93,7 +94,6 @@ export class KafkaClient implements IKafkaClient {
   }
 }
 
-const TOPICS = ["user-request", "payment-request"] as const;
 const userCreateRequestMessageSchema = z.object({
   name: z.string(),
   password: z.string(),
@@ -119,9 +119,3 @@ export const paymentRequestMessageSchema = z.object({
   amount: z.number(),
 });
 type PaymentRequestMessage = z.infer<typeof paymentRequestMessageSchema>;
-
-type Message<T extends Topic> = T extends "user-request"
-  ? UserRequestMessage
-  : T extends "payment-request"
-  ? PaymentRequestMessage
-  : never;

@@ -21,7 +21,20 @@ kafkaClient.startConsumer(["user-request"], (message, topic) => {}); // auto sug
 
 How I make the sendMessage and startConsumer to get the autocomplete working.
 I have a predefined topics in the kafka-client
-And I do some not elegant conditional check to make it work
+
+```typescript
+type TopicMessage = {
+  "user-request": UserRequestMessage;
+  "payment-request": PaymentRequestMessage;
+};
+type Topic = keyof TopicMessage;
+// we can get the message type like this
+// T is generic
+T extends Topic
+TopicMessage[T]
+```
+
+<s>And I do some not elegant conditional check to make it work
 
 ```typescript
 type Message<T extends Topic> = T extends "user-request"
@@ -32,7 +45,8 @@ type Message<T extends Topic> = T extends "user-request"
 ```
 
 One down side is if I want to add more topics, I need to do the check for each topic to get the correct message types
-I am still learning typescript. I would like to get some help if everyone happen to view this repo. Thanks in advance
+</s>I am still learning typescript. I would like to get some help
+if everyone happen to view this repo. Thanks in advance
 
 ## Using this example
 
