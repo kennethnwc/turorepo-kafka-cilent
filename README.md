@@ -1,13 +1,46 @@
-# Turborepo starter
+# Turborepo Shared typed kafka client
 
-This is an official starter Turborepo.
+This is an example to show how to share one kafka client with different backend services.
+Imagine you have a kafka cluster and two backend services(backend1, backend2) want to producer and consume the messages from the cluster.
+You dont want to repeat the same codes for kafka implementation in two backend 1 and 2 codebases.
+Then a kafka-client package comes in handy since you can import it and use it directly.
+One problem is how can we make it type safe and easy to use.
+I try to write the types that can autocomplete.
+
+# Highlight
+
+```typescript
+const kafkaClient = new KafkaClient("backend1", []); // you get the autocomplete for which services are "backend1" | "backend2"
+
+kafkaClient.sendMessage("payment-request", {}); // auto suggest which topic to choose and get the correct message type to pass in
+
+kafkaClient.startConsumer(["user-request"], (message, topic) => {}); // auto suggest what topics can be subscribed
+```
+
+## Limiations and Improvements
+
+How I make the sendMessage and startConsumer to get the autocomplete working.
+I have a predefined topics in the kafka-client
+And I do some not elegant conditional check to make it work
+
+```typescript
+type Message<T extends Topic> = T extends "user-request"
+  ? UserRequestMessage
+  : T extends "payment-request"
+  ? PaymentRequestMessage
+  : never;
+```
+
+One down side is if I want to add more topics, I need to do the check for each topic to get the correct message types
+I am still learning typescript. I would like to get some help if everyone happen to view this repo. Thanks in advance
 
 ## Using this example
 
 Run the following command:
 
 ```sh
-npx create-turbo@latest
+yarn
+yarn dev
 ```
 
 ## What's inside?
@@ -16,9 +49,9 @@ This Turborepo includes the following packages/apps:
 
 ### Apps and Packages
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `ui`: a stub React component library shared by both `web` and `docs` applications
+- `backend1`: a nodejs app
+- `backend2`: another nodejs app
+- `kafka-client`: a kakfka client package used by backend1 and backend2
 - `eslint-config-custom`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
 - `tsconfig`: `tsconfig.json`s used throughout the monorepo
 
@@ -37,8 +70,7 @@ This Turborepo has some additional tools already setup for you:
 To build all apps and packages, run the following command:
 
 ```
-cd my-turborepo
-pnpm build
+yarn build
 ```
 
 ### Develop
@@ -46,8 +78,7 @@ pnpm build
 To develop all apps and packages, run the following command:
 
 ```
-cd my-turborepo
-pnpm dev
+yarn dev
 ```
 
 ### Remote Caching
